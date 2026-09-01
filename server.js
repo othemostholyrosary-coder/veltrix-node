@@ -28,7 +28,9 @@ if (!WALLET_ADDRESS) {
 }
 
 // --- x402 payment + Bazaar discovery setup ---------------------------------
-const facilitatorClient = new HTTPFacilitatorClient({ url: 'https://x402.org/facilitator' });
+// PayAI's facilitator (Base Sepolia + mainnet, Solana, and more) auto-lists
+// any endpoint pointed at it in the x402 Bazaar — no signup, no API key.
+const facilitatorClient = new HTTPFacilitatorClient({ url: 'https://facilitator.payai.network' });
 const resourceServer = new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme());
 
 const routes = {
@@ -161,3 +163,4 @@ app.listen(PORT, () => {
   console.log(`Veltrix node listening on http://localhost:${PORT}`);
   console.log(`Network: ${NETWORK} | Price: ${PRICE} | Wallet: ${WALLET_ADDRESS}`);
 });
+    
