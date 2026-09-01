@@ -85,11 +85,17 @@ app.get('/', (req, res) => {
 // index a resource — the live 402 response alone isn't enough for them.
 app.get('/openapi.json', (req, res) => {
   res.json({
-    openapi: '3.0.0',
+    openapi: '3.1.0',
     info: {
       title: 'Veltrix Node',
       description: 'Task-routed Mistral endpoint: extract, summarize, classify, convert. Strict JSON output only.',
-      version: '1.0.0'
+      version: '1.0.0',
+      contact: { email: 'othemostholyrosary@gmail.com' },
+      'x-guidance': 'Call POST /query with a JSON body containing "task" (one of: extract, summarize, classify, convert) and "text". Add task-specific fields as needed: "schema" for extract, "domain"/"max_bullets" for summarize, "labels" for classify, "target_format" for convert. The response is always strict JSON — no prose, no markdown. Pay the quoted price via x402 (USDC on Base) to receive a result; unpaid calls receive 402 with payment requirements.'
+    },
+    externalDocs: {
+      url: 'https://veltrix-node.onrender.com/openapi.json',
+      description: 'This discovery document also serves as the endpoint documentation.'
     },
     servers: [{ url: `https://${req.get('host')}` }],
     paths: {
@@ -228,4 +234,4 @@ app.listen(PORT, () => {
   console.log(`Veltrix node listening on http://localhost:${PORT}`);
   console.log(`Network: ${NETWORK} | Price: ${PRICE} | Wallet: ${WALLET_ADDRESS}`);
 });
-    
+  
