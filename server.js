@@ -80,6 +80,71 @@ app.get('/', (req, res) => {
   res.json({ status: 'alive', node: 'veltrix', model: MISTRAL_MODEL, network: NETWORK, price: PRICE });
 });
 
+// --- OpenAPI discovery document -------------------------------------------
+// x402scan and similar crawlers require this at /openapi.json before they'll
+// index a resource — the live 402 response alone isn't enough for them.
+app.get('/openapi.json', (req, res) => {
+  res.json({
+    openapi: '3.0.0',
+    info: {
+      title: 'Veltrix Node',
+      description: 'Task-routed Mistral endpoint: extract, summarize, classify, convert. Strict JSON output only.',
+      version: '1.0.0'
+    },
+    servers: [{ url: `https://${req.get('host')}` }],
+    paths: {
+      '/query': {
+        post: {
+          operationId: 'query',
+          summary: 'Run a task (extract, summarize, classify, or convert) via Mistral',
+          'x-payment-info': {
+            price: { mode: 'fixed', currency: 'USD', amount: PRICE.replace('$', '') },
+            protocols: [{ x402: {} }]
+          },
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    task: { type: 'string', enum: ['extract', 'summarize', 'classify', 'convert'] },
+                    text: { type: 'string' },
+                    schema: { type: 'string', description: '(extract only)' },
+                    domain: { type: 'string', description: '(summarize only)' },
+                    max_bullets: { type: 'number', description: '(summarize only)' },
+                    labels: { type: 'array', items: { type: 'string' }, description: '(classify only)' },
+                    target_format: { type: 'string', description: '(convert only)' }
+                  },
+                  required: ['task', 'text']
+                }
+              }
+            }
+          },
+          responses: {
+            '200': {
+              description: 'Successful response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      task: { type: 'string' },
+                      result: { type: 'object' },
+                      usage: { type: 'object' }
+                    }
+                  }
+                }
+              }
+            },
+            '402': { description: 'Payment Required' }
+          }
+        }
+      }
+    }
+  });
+});
+
 // --- Task registry -----------------------------------------------------
 const TASKS = {
   extract: {
