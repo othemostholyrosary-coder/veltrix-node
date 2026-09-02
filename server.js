@@ -80,6 +80,32 @@ app.get('/', (req, res) => {
   res.json({ status: 'alive', node: 'veltrix', model: MISTRAL_MODEL, network: NETWORK, price: PRICE });
 });
 
+// --- llms.txt — plain-text discovery file some agent crawlers check directly
+app.get('/llms.txt', (req, res) => {
+  res.type('text/plain').send(
+`# Veltrix Node
+
+> Task-routed AI text endpoint for agents. Pay-per-call via x402 (USDC on Base).
+
+## What it does
+POST /query with a JSON body: {"task": "extract" | "summarize" | "classify" | "convert", "text": "..."}
+Returns strict JSON output only — no prose, no markdown. Price: ${PRICE} per call.
+
+## Tasks
+- extract: pull structured data from text into JSON (pass "schema" describing desired fields)
+- summarize: condense text into bullet points (pass "domain", "max_bullets")
+- classify: label text against a fixed set (pass "labels")
+- convert: transform text into a target format (pass "target_format")
+
+## Machine-readable spec
+${req.protocol}://${req.get('host')}/openapi.json
+
+## Payment
+x402 protocol, network: ${NETWORK}, facilitator: PayAI (facilitator.payai.network)
+`
+  );
+});
+
 // --- OpenAPI discovery document -------------------------------------------
 // x402scan and similar crawlers require this at /openapi.json before they'll
 // index a resource — the live 402 response alone isn't enough for them.
