@@ -105,7 +105,43 @@ x402 protocol, network: ${NETWORK}, facilitator: PayAI (facilitator.payai.networ
 `
   );
 });
-
+app.get('/.well-known/agent.json', (req, res) => {
+  res.json({
+    name: 'Veltrix Node',
+    description: 'Task-routed AI text endpoint. Extract, summarize, classify, or convert text using Mistral Small. Strict JSON output. Pay-per-call via x402 on Base.',
+    url: `https://${req.get('host')}`,
+    version: '1.0.0',
+    provider: {
+      organization: 'Veltrix',
+      contact: 'othemostholyrosary@gmail.com'
+    },
+    capabilities: {
+      streaming: false,
+      pushNotifications: false
+    },
+    skills: [
+      { name: 'extract', description: 'Pull structured JSON fields from text. Pass "schema" describing desired fields.' },
+      { name: 'summarize', description: 'Condense text into bullet points. Pass "domain" and "max_bullets".' },
+      { name: 'classify', description: 'Label text against a fixed set. Pass "labels" array.' },
+      { name: 'convert', description: 'Transform text into a target format. Pass "target_format".' }
+    ],
+    defaultInputModes: ['application/json'],
+    defaultOutputModes: ['application/json'],
+    payment: {
+      protocol: 'x402',
+      network: NETWORK,
+      price: PRICE,
+      asset: 'USDC',
+      facilitator: 'https://facilitator.payai.network'
+    },
+    endpoints: {
+      query: { method: 'POST', path: '/query' },
+      openapi: { method: 'GET', path: '/openapi.json' },
+      llms: { method: 'GET', path: '/llms.txt' }
+    }
+  });
+});
+    
 // --- OpenAPI discovery document -------------------------------------------
 // x402scan and similar crawlers require this at /openapi.json before they'll
 // index a resource — the live 402 response alone isn't enough for them.
